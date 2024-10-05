@@ -6,12 +6,9 @@ function* getConstrainedTypes(type: { new(...args: any[]): any }): Iterable<{ ne
     {
         const base = Object.getPrototypeOf(type);
 
-        if (base !== undefined && base !== null)
+        for (const t of getConstrainedTypes(base))
         {
-            for (const t of getConstrainedTypes(base))
-            {
-                yield t;
-            }
+            yield t;
         }
 
         if (Object.hasOwn(type, 'constraints') === true)
