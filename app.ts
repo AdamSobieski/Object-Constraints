@@ -24,9 +24,16 @@ function constraint<TConstructor extends { new(...args: any[]): TType }, TType>(
     {
         if (Object.hasOwn(type, 'constraints') === false)
         {
+            Object.defineProperty(type, 'constraints',
+                {
+                    value: new Array<Function>(),
+                    writable: false,
+                    enumerable: true
+                });
+
             Object.defineProperty(type, 'validate',
                 {
-                    value: function (obj)
+                    value: function (obj: object)
                     {
                         let errors = new Array<Error>();
 
@@ -58,13 +65,6 @@ function constraint<TConstructor extends { new(...args: any[]): TType }, TType>(
                     writable: false,
                     enumerable: true,
                     configurable: false
-                });
-
-            Object.defineProperty(type, 'constraints',
-                {
-                    value: new Array<Function>(),
-                    writable: false,
-                    enumerable: true
                 });
         }
 
