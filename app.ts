@@ -28,7 +28,8 @@ function constraint<TConstructor extends { new(...args: any[]): TType }, TType>(
                 {
                     value: new Array<Function>(),
                     writable: false,
-                    enumerable: true
+                    enumerable: true,
+                    configurable: false
                 });
 
             Object.defineProperty(type, 'validate',
