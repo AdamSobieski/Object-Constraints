@@ -1,6 +1,6 @@
 import assert = require("assert");
 
-function* getConstrainedBaseClasses(type: { new(...args: any[]): any }): Iterable<{ new(...args: any[]): any }>
+function* getConstrainedTypes(type: { new(...args: any[]): any }): Iterable<{ new(...args: any[]): any }>
 {
     if (type !== undefined && type !== null)
     {
@@ -8,15 +8,15 @@ function* getConstrainedBaseClasses(type: { new(...args: any[]): any }): Iterabl
 
         if (base !== undefined && base !== null)
         {
-            for (const t of getConstrainedBaseClasses(base))
+            for (const t of getConstrainedTypes(base))
             {
                 yield t;
             }
+        }
 
-            if (Object.hasOwn(base, 'constraints') === true)
-            {
-                yield base;
-            }
+        if (Object.hasOwn(type, 'constraints') === true)
+        {
+            yield type;
         }
     }
 }
@@ -25,35 +25,18 @@ function constraint<TConstructor extends { new(...args: any[]): TType }, TType>(
 {
     return function (type: any): any
     {
-        const constrainedBaseClasses = Array.from(getConstrainedBaseClasses(type));
-
-        if (constrainedBaseClasses.length > 0)
+        if (Object.hasOwn(type, 'constraints') === false)
         {
-            if (Object.hasOwn(type, 'constraints') === false)
-            {
-                Object.defineProperty(type, 'validate',
+            Object.defineProperty(type, 'validate',
+                {
+                    value: function (obj)
                     {
-                        value: function (obj)
+                        let errors = new Array<Error>();
+
+                        for (const base of getConstrainedTypes(type))
                         {
-                            let errors = new Array<Error>();
-
-                            for (const base of constrainedBaseClasses)
-                            {
-                                // @ts-ignore
-                                for (const c of base.constraints)
-                                {
-                                    try
-                                    {
-                                        c(obj);
-                                    }
-                                    catch (e)
-                                    {
-                                        errors.push(e);
-                                    }
-                                }
-                            }
-
-                            for (const c of this.constraints)
+                            // @ts-ignore
+                            for (const c of base.constraints)
                             {
                                 try
                                 {
@@ -64,77 +47,31 @@ function constraint<TConstructor extends { new(...args: any[]): TType }, TType>(
                                     errors.push(e);
                                 }
                             }
+                        }
 
-                            if (errors.length == 1)
-                            {
-                                throw errors[0];
-                            }
-                            if (errors.length > 1)
-                            {
-                                throw new AggregateError(errors);
-                            }
-                        },
-                        writable: false,
-                        enumerable: true,
-                        configurable: false
-                    });
-
-                Object.defineProperty(type, 'constraints',
-                    {
-                        value: new Array<Function>(),
-                        writable: false,
-                        enumerable: true
-                    });
-            }
-
-            type.constraints.push(constraint);
-        }
-        else
-        {
-            if (Object.hasOwn(type, 'constraints') === false)
-            {
-                Object.defineProperty(type, 'validate',
-                    {
-                        value: function (obj)
+                        if (errors.length == 1)
                         {
-                            let errors = new Array<Error>();
+                            throw errors[0];
+                        }
+                        if (errors.length > 1)
+                        {
+                            throw new AggregateError(errors);
+                        }
+                    },
+                    writable: false,
+                    enumerable: true,
+                    configurable: false
+                });
 
-                            for (const c of this.constraints)
-                            {
-                                try
-                                {
-                                    c(obj);
-                                }
-                                catch (e)
-                                {
-                                    errors.push(e);
-                                }
-                            }
-
-                            if (errors.length == 1)
-                            {
-                                throw errors[0];
-                            }
-                            if (errors.length > 1)
-                            {
-                                throw new AggregateError(errors);
-                            }
-                        },
-                        writable: false,
-                        enumerable: true,
-                        configurable: false
-                    });
-
-                Object.defineProperty(type, 'constraints',
-                    {
-                        value: new Array<Function>(),
-                        writable: false,
-                        enumerable: true
-                    });
-            }
-
-            type.constraints.push(constraint);
+            Object.defineProperty(type, 'constraints',
+                {
+                    value: new Array<Function>(),
+                    writable: false,
+                    enumerable: true
+                });
         }
+
+        type.constraints.push(constraint);
 
         return type;
     }
