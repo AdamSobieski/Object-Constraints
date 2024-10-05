@@ -142,7 +142,7 @@ function constraint<TConstructor extends { new(...args: any[]): TType }, TType>(
 
 function freeze(type: any): any
 {
-    if (Object.getOwnPropertyDescriptor(type, 'constraints') !== undefined)
+    if (Object.hasOwn(type, 'constraints') === true)
     {
         Object.freeze(type.constraints);
     }
