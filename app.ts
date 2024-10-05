@@ -8,14 +8,14 @@ function* getConstrainedBaseClasses(type: { new(...args: any[]): any }): Iterabl
 
         if (base !== undefined && base !== null)
         {
-            if (Object.hasOwn(base, 'constraints') === true)
-            {
-                yield base;
-            }
-
             for (const t of getConstrainedBaseClasses(base))
             {
                 yield t;
+            }
+
+            if (Object.hasOwn(base, 'constraints') === true)
+            {
+                yield base;
             }
         }
     }
@@ -25,7 +25,7 @@ function constraint<TConstructor extends { new(...args: any[]): TType }, TType>(
 {
     return function (type: any): any
     {
-        const constrainedBaseClasses = Array.from(getConstrainedBaseClasses(type)).reverse();
+        const constrainedBaseClasses = Array.from(getConstrainedBaseClasses(type));
 
         if (constrainedBaseClasses.length > 0)
         {
