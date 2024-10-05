@@ -33,10 +33,10 @@ function constraint<TConstructor extends { new(...args: any[]): TType }, TType>(
                     {
                         let errors = new Array<Error>();
 
-                        for (const base of getConstrainedTypes(type))
+                        for (const t of getConstrainedTypes(type))
                         {
                             // @ts-ignore
-                            for (const c of base.constraints)
+                            for (const c of t.constraints)
                             {
                                 try
                                 {
