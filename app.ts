@@ -8,7 +8,7 @@ function* getConstrainedBaseClasses(type: { new(...args: any[]): any }): Iterabl
 
         if (base !== undefined && base !== null)
         {
-            if (Object.getOwnPropertyDescriptor(base, 'constraints') !== undefined)
+            if (Object.hasOwn(base, 'constraints') === true)
             {
                 yield base;
             }
@@ -29,7 +29,7 @@ function constraint<TConstructor extends { new(...args: any[]): TType }, TType>(
 
         if (constrainedBaseClasses.length > 0)
         {
-            if (Object.getOwnPropertyDescriptor(type, 'constraints') === undefined)
+            if (Object.hasOwn(type, 'constraints') === false)
             {
                 Object.defineProperty(type, 'validate',
                     {
@@ -91,7 +91,7 @@ function constraint<TConstructor extends { new(...args: any[]): TType }, TType>(
         }
         else
         {
-            if (Object.getOwnPropertyDescriptor(type, 'constraints') === undefined)
+            if (Object.hasOwn(type, 'constraints') === false)
             {
                 Object.defineProperty(type, 'validate',
                     {
