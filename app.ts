@@ -81,14 +81,14 @@ function precondition(condition: Function): Function
     {
         let f = descriptor.value;
 
-        if (Object.hasOwn(descriptor.value, 'wraps') === false)
+        if (Object.hasOwn(descriptor.value, 'preconditions') === false)
         {
             descriptor.value = function (...args)
             {
                 let errors = new Array<Error>();
 
                 // @ts-ignore
-                for (const c of f.wrappedBy.preconditions)
+                for (const c of f.__outer__.preconditions)
                 {
                     try
                     {
@@ -112,7 +112,7 @@ function precondition(condition: Function): Function
                 let r = f(...args);
 
                 // @ts-ignore
-                for (const c of f.wrappedBy.postconditions)
+                for (const c of f.__outer__.postconditions)
                 {
                     try
                     {
@@ -136,7 +136,7 @@ function precondition(condition: Function): Function
                 return r;
             }
 
-            Object.defineProperty(f, 'wrappedBy',
+            Object.defineProperty(f, '__outer__',
                 {
                     value: descriptor.value,
                     writable: false,
@@ -144,7 +144,7 @@ function precondition(condition: Function): Function
                     configurable: false
                 });
 
-            Object.defineProperty(descriptor.value, 'wraps',
+            Object.defineProperty(descriptor.value, '__inner__',
                 {
                     value: f,
                     writable: false,
@@ -183,14 +183,14 @@ function postcondition(condition: Function): Function
     {
         let f = descriptor.value;
 
-        if (Object.hasOwn(descriptor.value, 'wraps') === false)
+        if (Object.hasOwn(descriptor.value, 'postconditions') === false)
         {
             descriptor.value = function (...args)
             {
                 let errors = new Array<Error>();
 
                 // @ts-ignore
-                for (const c of f.wrappedBy.preconditions)
+                for (const c of f.__outer__.preconditions)
                 {
                     try
                     {
@@ -214,7 +214,7 @@ function postcondition(condition: Function): Function
                 let r = f(...args);
 
                 // @ts-ignore
-                for (const c of f.wrappedBy.postconditions)
+                for (const c of f.__outer__.postconditions)
                 {
                     try
                     {
@@ -238,7 +238,7 @@ function postcondition(condition: Function): Function
                 return r;
             }
 
-            Object.defineProperty(f, 'wrappedBy',
+            Object.defineProperty(f, '__outer__',
                 {
                     value: descriptor.value,
                     writable: false,
@@ -246,7 +246,7 @@ function postcondition(condition: Function): Function
                     configurable: false
                 });
 
-            Object.defineProperty(descriptor.value, 'wraps',
+            Object.defineProperty(descriptor.value, '__inner__',
                 {
                     value: f,
                     writable: false,
