@@ -1,6 +1,6 @@
-# TypeScript Constraints
+# Object Constraints
 
-This project provides a proof-of-concept prototype for a TypeScript constraints system.
+This project provides a proof-of-concept prototype for a constraints system.
 
 ```typescript
 @constraint((obj: Foo) => { assert(obj.s >= 0) })
@@ -42,3 +42,5 @@ obj.w = 1;
 
 Foo4.validate(obj);
 ```
+
+**Coming soon**: Function preconditions and postconditions.
