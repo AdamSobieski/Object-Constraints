@@ -75,16 +75,192 @@ function constraint<TConstructor extends { new(...args: any[]): TType }, TType>(
     }
 }
 
-function freeze(type: any): any
+function precondition(condition: Function): Function
 {
-    if (Object.hasOwn(type, 'constraints') === true)
+    return function (target: any, key: string, descriptor: PropertyDescriptor): PropertyDescriptor
     {
-        Object.freeze(type.constraints);
+        let f = descriptor.value;
+
+        if (Object.hasOwn(descriptor.value, 'wraps') === false)
+        {
+            descriptor.value = function (...args)
+            {
+                let errors = new Array<Error>();
+
+                // @ts-ignore
+                for (const c of f.wrappedBy.preconditions)
+                {
+                    try
+                    {
+                        c(...args);
+                    }
+                    catch (e)
+                    {
+                        errors.push(e);
+                    }
+                }
+
+                let r = f(...args);
+
+                // @ts-ignore
+                for (const c of f.wrappedBy.postconditions)
+                {
+                    try
+                    {
+                        c(r);
+                    }
+                    catch (e)
+                    {
+                        errors.push(e);
+                    }
+                }
+
+                if (errors.length == 1)
+                {
+                    throw errors[0];
+                }
+                if (errors.length > 1)
+                {
+                    throw new AggregateError(errors);
+                }
+
+                return r;
+            }
+
+            Object.defineProperty(f, 'wrappedBy',
+                {
+                    value: descriptor.value,
+                    writable: false,
+                    enumerable: true,
+                    configurable: false
+                });
+
+            Object.defineProperty(descriptor.value, 'wraps',
+                {
+                    value: f,
+                    writable: false,
+                    enumerable: true,
+                    configurable: false
+                }
+            );
+
+            Object.defineProperty(descriptor.value, 'preconditions',
+                {
+                    value: new Array<Function>,
+                    writable: false,
+                    enumerable: true,
+                    configurable: false
+                });
+
+            Object.defineProperty(descriptor.value, 'postconditions',
+                {
+                    value: new Array<Function>,
+                    writable: false,
+                    enumerable: true,
+                    configurable: false
+                });
+        }
+
+        // @ts-ignore
+        descriptor.value.preconditions.push(condition);
+
+        return descriptor;
     }
-    return type;
 }
 
-@freeze
+function postcondition(condition: Function): Function
+{
+    return function (target: any, key: string, descriptor: PropertyDescriptor): PropertyDescriptor
+    {
+        let f = descriptor.value;
+
+        if (Object.hasOwn(descriptor.value, 'wraps') === false)
+        {
+            descriptor.value = function (...args)
+            {
+                let errors = new Array<Error>();
+
+                // @ts-ignore
+                for (const c of f.wrappedBy.preconditions)
+                {
+                    try
+                    {
+                        c(...args);
+                    }
+                    catch (e)
+                    {
+                        errors.push(e);
+                    }
+                }
+
+                let r = f(...args);
+
+                // @ts-ignore
+                for (const c of f.wrappedBy.postconditions)
+                {
+                    try
+                    {
+                        c(r);
+                    }
+                    catch (e)
+                    {
+                        errors.push(e);
+                    }
+                }
+
+                if (errors.length == 1)
+                {
+                    throw errors[0];
+                }
+                if (errors.length > 1)
+                {
+                    throw new AggregateError(errors);
+                }
+
+                return r;
+            }
+
+            Object.defineProperty(f, 'wrappedBy',
+                {
+                    value: descriptor.value,
+                    writable: false,
+                    enumerable: true,
+                    configurable: false
+                });
+
+            Object.defineProperty(descriptor.value, 'wraps',
+                {
+                    value: f,
+                    writable: false,
+                    enumerable: true,
+                    configurable: false
+                }
+            );
+
+            Object.defineProperty(descriptor.value, 'preconditions',
+                {
+                    value: new Array<Function>,
+                    writable: false,
+                    enumerable: true,
+                    configurable: false
+                });
+
+            Object.defineProperty(descriptor.value, 'postconditions',
+                {
+                    value: new Array<Function>,
+                    writable: false,
+                    enumerable: true,
+                    configurable: false
+                });
+        }
+
+        // @ts-ignore
+        descriptor.value.postconditions.push(condition);
+
+        return descriptor;
+    }
+}
+
 @constraint((obj: Foo) => { assert(obj.s >= 0) })
 @constraint((obj: Foo) => { assert(obj.r >= 0) })
 class Foo
@@ -93,7 +269,6 @@ class Foo
     s: number;
 }
 
-@freeze
 @constraint((obj: Foo2) => { assert(obj.u >= 0) })
 @constraint((obj: Foo2) => { assert(obj.t >= 0) })
 class Foo2 extends Foo
@@ -107,7 +282,6 @@ class Foo3 extends Foo2
     v: number;
 }
 
-@freeze
 @constraint((obj: Foo4) => { assert(obj.w >= 0) })
 @constraint((obj: Foo4) => { assert(obj.v >= 0) })
 class Foo4 extends Foo3
@@ -126,3 +300,32 @@ obj.w = 1;
 
 // @ts-ignore
 Foo4.validate(obj);
+
+class Foo5
+{
+    @postcondition((result: Foo) => { assert(result.s > result.r) })
+    // @ts-ignore
+    @postcondition((result: Foo) => { Foo.validate(result) })
+    // @ts-ignore
+    @precondition((x: Foo, y: Foo) => { Foo.validate(y) })
+    // @ts-ignore
+    @precondition((x: Foo, y: Foo) => { Foo.validate(x) })
+    fun(x: Foo, y: Foo): Foo
+    {
+        let r = new Foo();
+        r.r = 1;
+        r.s = 2;
+        return r;
+    }
+}
+
+let fa = new Foo();
+fa.r = 0;
+fa.s = 0;
+
+let fb = new Foo();
+fb.r = 0;
+fb.s = 0;
+
+let f5 = new Foo5();
+f5.fun(fa, fb);

@@ -43,4 +43,19 @@ obj.w = 1;
 Foo4.validate(obj);
 ```
 
-**Coming soon**: Function preconditions and postconditions.
+```typescript
+class Foo5
+{
+    @postcondition((result: Foo) => { assert(result.s > result.r) })
+    @postcondition((result: Foo) => { Foo.validate(result) })
+    @precondition((x: Foo, y: Foo) => { Foo.validate(y) })
+    @precondition((x: Foo, y: Foo) => { Foo.validate(x) })
+    fun(x: Foo, y: Foo): Foo
+    {
+        let r = new Foo();
+        r.r = 1;
+        r.s = 2;
+        return r;
+    }
+}
+```
