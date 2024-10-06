@@ -100,6 +100,15 @@ function precondition(condition: Function): Function
                     }
                 }
 
+                if (errors.length == 1)
+                {
+                    throw errors[0];
+                }
+                if (errors.length > 1)
+                {
+                    throw new AggregateError(errors);
+                }
+
                 let r = f(...args);
 
                 // @ts-ignore
@@ -191,6 +200,15 @@ function postcondition(condition: Function): Function
                     {
                         errors.push(e);
                     }
+                }
+
+                if (errors.length == 1)
+                {
+                    throw errors[0];
+                }
+                if (errors.length > 1)
+                {
+                    throw new AggregateError(errors);
                 }
 
                 let r = f(...args);
