@@ -1,7 +1,7 @@
 {
-  "name": "typescript-constraints",
+  "name": "object-constraints",
   "version": "1.0.0",
-  "description": "TypeScript Constraints",
+  "description": "Object Constraints",
   "main": "app.js",
   "author": {
     "name": ""
