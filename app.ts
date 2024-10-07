@@ -144,15 +144,6 @@ function precondition(condition: Function): Function
                     configurable: false
                 });
 
-            Object.defineProperty(descriptor.value, '__inner__',
-                {
-                    value: f,
-                    writable: false,
-                    enumerable: true,
-                    configurable: false
-                }
-            );
-
             Object.defineProperty(descriptor.value, 'preconditions',
                 {
                     value: new Array<Function>,
@@ -245,15 +236,6 @@ function postcondition(condition: Function): Function
                     enumerable: true,
                     configurable: false
                 });
-
-            Object.defineProperty(descriptor.value, '__inner__',
-                {
-                    value: f,
-                    writable: false,
-                    enumerable: true,
-                    configurable: false
-                }
-            );
 
             Object.defineProperty(descriptor.value, 'preconditions',
                 {
