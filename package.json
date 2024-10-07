@@ -4,7 +4,7 @@
   "description": "Object Constraints",
   "main": "app.js",
   "author": {
-    "name": ""
+    "name": "Adam Sobieski"
   },
   "scripts": {
     "build": "tsc --build",

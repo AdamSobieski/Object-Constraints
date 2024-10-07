@@ -1,6 +1,8 @@
 # Object Constraints
 
-This project provides a proof-of-concept prototype for a constraints system.
+This project provides a proof-of-concept prototype for an object constraints system.
+
+## Syntax
 
 ```typescript
 @constraint((obj: Foo) => { assert(obj.s >= 0) })
