@@ -79,10 +79,10 @@ function precondition(condition: Function): Function
 {
     return function (target: any, key: string, descriptor: PropertyDescriptor): PropertyDescriptor
     {
-        let f = descriptor.value;
-
         if (Object.hasOwn(descriptor.value, 'preconditions') === false)
         {
+            let f = descriptor.value;
+
             descriptor.value = function (...args)
             {
                 let errors = new Array<Error>();
@@ -181,10 +181,10 @@ function postcondition(condition: Function): Function
 {
     return function (target: any, key: string, descriptor: PropertyDescriptor): PropertyDescriptor
     {
-        let f = descriptor.value;
-
         if (Object.hasOwn(descriptor.value, 'postconditions') === false)
         {
+            let f = descriptor.value;
+
             descriptor.value = function (...args)
             {
                 let errors = new Array<Error>();
